@@ -90,6 +90,7 @@ export default function DrawingCanvas({
   // Redraw the main canvas whenever layers change
   useEffect(() => {
     redrawCanvas()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layers])
 
   // Redraw the composite canvas from all visible layers
@@ -533,15 +534,15 @@ export default function DrawingCanvas({
       save: saveAsImage,
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     window.drawingApp = drawingApp
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
-      // @ts-ignore
+      // @ts-expect-error
       delete window.drawingApp
     }
-  }, [historyIndex, history])
+  }, [historyIndex, history, handleUndo, handleRedo, handleClearCanvas])
 
   return (
     <div
