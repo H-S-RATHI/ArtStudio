@@ -292,12 +292,12 @@ export default function DrawingCanvas({
     if (tool === "brush" || tool === "eraser") {
       ctx.lineTo(x, y)
       ctx.stroke()
+      redrawCanvas()
     } else {
       // For shapes, we'll preview them on the main canvas during mouse move
       const mainCtx = canvasRef.current.getContext("2d")
       if (!mainCtx) return
 
-      // Redraw the composite canvas to clear previous preview
       redrawCanvas()
 
       // Draw shape preview
