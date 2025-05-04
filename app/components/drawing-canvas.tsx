@@ -1,8 +1,8 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, useCallback } from "react"
 
 interface Layer {
   id: string
@@ -104,17 +104,17 @@ export default function DrawingCanvas({
     return () => {
       window.removeEventListener("resize", resizeCanvas)
     }
-  }, [setLayers])
+  }, [setLayers, redrawCanvas])
 
   // Update undo/redo status
   useEffect(() => {
     onUndoStatusChange(historyIndex > 0, historyIndex < history.length - 1)
-  }, [historyIndex, history, onUndoStatusChange])
+  }, [historyIndex, history, onUndoStatusChange, redrawCanvas])
 
   // Redraw the main canvas whenever layers change
   useEffect(() => {
     redrawCanvas()
-  }, [layers])
+  }, [layers, redrawCanvas])
 
   // Get the active layer's canvas context
   const getActiveLayerContext = () => {
@@ -141,7 +141,7 @@ export default function DrawingCanvas({
   }
 
   // Undo action
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     if (historyIndex <= 0) return
 
     const newIndex = historyIndex - 1
@@ -169,10 +169,10 @@ export default function DrawingCanvas({
       layerCtx.drawImage(img, 0, 0)
     }
     img.src = history[newIndex]
-  }
+  }, [historyIndex, history, canvasRef, activeLayerId, layers])
 
   // Redo action
-  const handleRedo = () => {
+  const handleRedo = useCallback(() => {
     if (historyIndex >= history.length - 1) return
 
     const newIndex = historyIndex + 1
@@ -200,10 +200,10 @@ export default function DrawingCanvas({
       layerCtx.drawImage(img, 0, 0)
     }
     img.src = history[newIndex]
-  }
+  }, [historyIndex, history, canvasRef, activeLayerId, layers])
 
   // Clear the canvas
-  const handleClearCanvas = () => {
+  const handleClearCanvas = useCallback(() => {
     if (!canvasRef.current) return
 
     // Clear all layers
@@ -220,14 +220,14 @@ export default function DrawingCanvas({
     )
 
     // Clear the main canvas
-    const ctx = canvasRef.current.getContext("2d")
-    if (ctx) {
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-    }
+    const ctx = canvasRef.current?.getContext("2d")
+    if (!ctx) return
+
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
     // Save to history
     saveToHistory()
-  }
+  }, [canvasRef, setLayers, saveToHistory])
 
   // Handle mouse down event
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
