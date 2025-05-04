@@ -545,12 +545,12 @@ export default function DrawingCanvas({
       save: saveAsImage,
     }
 
-    // @ts-expect-error
+    // @ts-expect-error -- Type 'Window & typeof globalThis' has no property 'drawingApp'
     window.drawingApp = drawingApp
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
-      // @ts-expect-error
+      // @ts-expect-error -- Type 'Window & typeof globalThis' has no property 'drawingApp'
       delete window.drawingApp
     }
   }, [historyIndex, history, handleUndo, handleRedo, handleClearCanvas, saveAsImage])
