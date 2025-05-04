@@ -7,12 +7,13 @@ import ColorPalette from "@/app/components/color-palette"
 import LayersPanel from "@/app/components/layers-panel"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import type { Layer } from "@/app/components/drawing-canvas"
 
 export default function DrawingApp() {
   const [currentTool, setCurrentTool] = useState<string>("brush")
   const [brushSize, setBrushSize] = useState<number>(5)
   const [currentColor, setCurrentColor] = useState<string>("#000000")
-  const [layers, setLayers] = useState<any[]>([{ id: "1", name: "Layer 1", visible: true, canvas: null }])
+  const [layers, setLayers] = useState<Layer[]>([{ id: "1", name: "Layer 1", visible: true, canvas: null }])
   const [activeLayerId, setActiveLayerId] = useState<string>("1")
   const [canUndo, setCanUndo] = useState<boolean>(false)
   const [canRedo, setCanRedo] = useState<boolean>(false)

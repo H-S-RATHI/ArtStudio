@@ -1,9 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
+import type { Layer } from "@/app/components/drawing-canvas"
 
 interface LayersPanelProps {
-  layers: any[]
+  layers: Layer[]
   activeLayerId: string
   onAddLayer: () => void
   onDeleteLayer: (id: string) => void

@@ -4,8 +4,9 @@ import React from "react"
 
 import { useRef, useEffect, useState, useCallback, useMemo } from "react"
 
-interface Layer {
+export interface Layer {
   id: string
+  name: string
   canvas: HTMLCanvasElement | null
   visible: boolean
 }
