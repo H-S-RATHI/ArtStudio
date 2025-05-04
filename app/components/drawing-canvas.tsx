@@ -4,12 +4,18 @@ import type React from "react"
 
 import { useRef, useEffect, useState } from "react"
 
+interface Layer {
+  id: string
+  canvas: HTMLCanvasElement
+  visible: boolean
+}
+
 interface DrawingCanvasProps {
   tool: string
   brushSize: number
   color: string
-  layers: any[]
-  setLayers: React.Dispatch<React.SetStateAction<any[]>>
+  layers: Layer[]
+  setLayers: React.Dispatch<React.SetStateAction<Layer[]>>
   activeLayerId: string
   onUndoStatusChange: (canUndo: boolean, canRedo: boolean) => void
 }
