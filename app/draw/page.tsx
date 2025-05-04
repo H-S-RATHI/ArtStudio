@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import DrawingCanvas from "@/components/drawing-canvas"
-import Toolbar from "@/components/toolbar"
-import ColorPalette from "@/components/color-palette"
-import LayersPanel from "../components/layers-panel"
+import DrawingCanvas from "@/app/components/drawing-canvas"
+import Toolbar from "@/app/components/toolbar"
+import ColorPalette from "@/app/components/color-palette"
+import LayersPanel from "@/app/components/layers-panel"
 import { motion } from "framer-motion"
 import Link from "next/link"
 
