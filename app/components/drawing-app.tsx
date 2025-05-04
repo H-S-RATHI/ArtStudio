@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 
 type Tool = "brush" | "eraser" | "rectangle" | "circle" | "line"
@@ -14,7 +14,6 @@ type Layer = {
 }
 
 export default function DrawingApp() {
-  // State variables
   const [currentTool, setCurrentTool] = useState<Tool>("brush")
   const [brushSize, setBrushSize] = useState(5)
   const [color, setColor] = useState("#000000")
@@ -25,26 +24,18 @@ export default function DrawingApp() {
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
 
-  // Refs
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
 
-  // Canvas operations
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-    return activeLayer.canvas.getContext("2d")
-  }
+  // Define redrawCanvas function with useCallback to use in dependency arrays
+  const redrawCanvas = useCallback(() => {
+    if (!canvasRef.current) return
 
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
+    const ctx = canvasRef.current.getContext("2d")
     if (!ctx) return
 
     // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
     // Draw each visible layer
     layers.forEach((layer) => {
@@ -52,14 +43,14 @@ export default function DrawingApp() {
         ctx.drawImage(layer.canvas, 0, 0)
       }
     })
-  }
+  }, [layers])
 
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
+  // Save current state to history with useCallback
+  const saveToHistory = useCallback(() => {
+    if (!canvasRef.current) return
 
     // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
+    const newHistoryEntry = canvasRef.current.toDataURL()
 
     // If we're not at the end of the history, truncate it
     if (historyIndex < history.length - 1) {
@@ -68,794 +59,7 @@ export default function DrawingApp() {
 
     setHistory((prev) => [...prev, newHistoryEntry])
     setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo/Redo actions
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Canvas operations
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-    return activeLayer.canvas.getContext("2d")
-  }
-
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo/Redo actions
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Canvas operations
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-    return activeLayer.canvas.getContext("2d")
-  }
-
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo/Redo actions
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Canvas operations
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-    return activeLayer.canvas.getContext("2d")
-  }
-
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo/Redo actions
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Canvas operations
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-    return activeLayer.canvas.getContext("2d")
-  }
-
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo/Redo actions
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-  const [activeLayerId, setActiveLayerId] = useState("1")
-  const [startPosition, setStartPosition] = useState<{ x: number; y: number } | null>(null)
-  const [history, setHistory] = useState<string[]>([])
-  const [historyIndex, setHistoryIndex] = useState(-1)
-
-  // Canvas and container refs
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
-
-  // Canvas operations
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-    return activeLayer.canvas.getContext("2d")
-  }
-
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo/Redo actions
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Redraw the composite canvas from all visible layers
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  // Save current state to history
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo action
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Redo action
-  const handleRedo = () => {
-    if (historyIndex >= history.length - 1) return
-
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-
-    // Load the next state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Redraw the composite canvas from all visible layers
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  // Save current state to history
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Undo action
-  const handleUndo = () => {
-    if (historyIndex <= 0) return
-
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-
-    // Load the previous state
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-
-      // Update the active layer with this state
-      const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-      if (!activeLayer || !activeLayer.canvas) return
-
-      const layerCtx = activeLayer.canvas.getContext("2d")
-      if (!layerCtx) return
-
-      layerCtx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height)
-      layerCtx.drawImage(img, 0, 0)
-    }
-    img.src = history[newIndex]
-  }
-
-  // Redraw the composite canvas from all visible layers
-  const redrawCanvas = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
-
-  // Save current state to history
-  const saveToHistory = () => {
-    const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement
-    if (!canvas) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvas.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-  const [activeLayerId, setActiveLayerId] = useState("1")
-  const [startPosition, setStartPosition] = useState<{ x: number; y: number } | null>(null)
-  const [history, setHistory] = useState<string[]>([])
-  const [historyIndex, setHistoryIndex] = useState(-1)
-
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  }, [historyIndex, history])
 
   // Initialize canvas and layers
   useEffect(() => {
@@ -907,38 +111,12 @@ export default function DrawingApp() {
     return () => {
       window.removeEventListener("resize", resizeCanvas)
     }
-  }, [])
+  }, [redrawCanvas, saveToHistory])
 
   // Redraw the main canvas whenever layers change
   useEffect(() => {
-    (window as any).drawingApp = {
-      undo: handleUndo,
-      redo: handleRedo
-    };
-  }, [handleUndo, handleRedo]);
-
-  useEffect(() => {
     redrawCanvas()
   }, [layers, redrawCanvas])
-
-  // Redraw the composite canvas from all visible layers
-  const redrawCanvas = () => {
-  const redrawCanvas = () => {
-    if (!canvasRef.current) return
-
-    const ctx = canvasRef.current.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
 
   // Get the active layer's canvas context
   const getActiveLayerContext = () => {
@@ -948,24 +126,8 @@ export default function DrawingApp() {
     return activeLayer.canvas.getContext("2d")
   }
 
-  // Save current state to history
-  const saveToHistory = () => {
-    if (!canvasRef.current) return
-
-    // Create a new history entry
-    const newHistoryEntry = canvasRef.current.toDataURL()
-
-    // If we're not at the end of the history, truncate it
-    if (historyIndex < history.length - 1) {
-      setHistory((prev) => prev.slice(0, historyIndex + 1))
-    }
-
-    setHistory((prev) => [...prev, newHistoryEntry])
-    setHistoryIndex((prev) => prev + 1)
-  }
-
   // Undo action
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     if (historyIndex <= 0) return
 
     const newIndex = historyIndex - 1
@@ -992,10 +154,10 @@ export default function DrawingApp() {
       layerCtx.drawImage(img, 0, 0)
     }
     img.src = history[newIndex]
-  }
+  }, [historyIndex, history, activeLayerId, layers])
 
   // Redo action
-  const handleRedo = () => {
+  const handleRedo = useCallback(() => {
     if (historyIndex >= history.length - 1) return
 
     const newIndex = historyIndex + 1
@@ -1022,10 +184,10 @@ export default function DrawingApp() {
       layerCtx.drawImage(img, 0, 0)
     }
     img.src = history[newIndex]
-  }
+  }, [historyIndex, history, activeLayerId, layers])
 
   // Clear the canvas
-  const handleClearCanvas = () => {
+  const handleClearCanvas = useCallback(() => {
     if (!canvasRef.current) return
 
     // Clear all layers
@@ -1049,7 +211,7 @@ export default function DrawingApp() {
 
     // Save to history
     saveToHistory()
-  }
+  }, [saveToHistory])
 
   // Add a new layer
   const handleAddLayer = () => {
