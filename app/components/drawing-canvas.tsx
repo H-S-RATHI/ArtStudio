@@ -4,18 +4,12 @@ import type React from "react"
 
 import { useRef, useEffect, useState } from "react"
 
-interface Layer {
-  id: string
-  canvas: HTMLCanvasElement
-  visible: boolean
-}
-
 interface DrawingCanvasProps {
   tool: string
   brushSize: number
   color: string
-  layers: Layer[]
-  setLayers: React.Dispatch<React.SetStateAction<Layer[]>>
+  layers: any[]
+  setLayers: React.Dispatch<React.SetStateAction<any[]>>
   activeLayerId: string
   onUndoStatusChange: (canUndo: boolean, canRedo: boolean) => void
 }
@@ -36,6 +30,68 @@ export default function DrawingCanvas({
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
 
+  // Initialize canvas and layers
+  useEffect(() => {
+    if (!canvasRef.current || !containerRef.current) return
+
+    const canvas = canvasRef.current
+    const container = containerRef.current
+
+    // Set canvas size to match container
+    const resizeCanvas = () => {
+      canvas.width = container.clientWidth
+      canvas.height = container.clientHeight
+
+      // Initialize all layer canvases with the same dimensions
+      setLayers((prevLayers) =>
+        prevLayers.map((layer) => {
+          if (!layer.canvas) {
+            const newCanvas = document.createElement("canvas")
+            newCanvas.width = canvas.width
+            newCanvas.height = canvas.height
+            return { ...layer, canvas: newCanvas }
+          }
+
+          if (layer.canvas.width !== canvas.width || layer.canvas.height !== canvas.height) {
+            const newCanvas = document.createElement("canvas")
+            newCanvas.width = canvas.width
+            newCanvas.height = canvas.height
+            const ctx = newCanvas.getContext("2d")
+            if (ctx) {
+              ctx.drawImage(layer.canvas, 0, 0)
+            }
+            return { ...layer, canvas: newCanvas }
+          }
+
+          return layer
+        }),
+      )
+
+      // Redraw the composite canvas
+      redrawCanvas()
+    }
+
+    resizeCanvas()
+    window.addEventListener("resize", resizeCanvas)
+
+    // Save initial state to history
+    saveToHistory()
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas)
+    }
+  }, [])
+
+  // Update undo/redo status
+  useEffect(() => {
+    onUndoStatusChange(historyIndex > 0, historyIndex < history.length - 1)
+  }, [historyIndex, history, onUndoStatusChange])
+
+  // Redraw the main canvas whenever layers change
+  useEffect(() => {
+    redrawCanvas()
+  }, [layers])
+
   // Redraw the composite canvas from all visible layers
   const redrawCanvas = () => {
     if (!canvasRef.current) return
@@ -54,6 +110,14 @@ export default function DrawingCanvas({
     })
   }
 
+  // Get the active layer's canvas context
+  const getActiveLayerContext = () => {
+    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
+    if (!activeLayer || !activeLayer.canvas) return null
+
+    return activeLayer.canvas.getContext("2d")
+  }
+
   // Save current state to history
   const saveToHistory = () => {
     if (!canvasRef.current) return
@@ -68,14 +132,6 @@ export default function DrawingCanvas({
 
     setHistory((prev) => [...prev, newHistoryEntry])
     setHistoryIndex((prev) => prev + 1)
-  }
-
-  // Get the active layer's canvas context
-  const getActiveLayerContext = () => {
-    const activeLayer = layers.find((layer) => layer.id === activeLayerId)
-    if (!activeLayer || !activeLayer.canvas) return null
-
-    return activeLayer.canvas.getContext("2d")
   }
 
   // Undo action
@@ -222,7 +278,6 @@ export default function DrawingCanvas({
     if (tool === "brush" || tool === "eraser") {
       ctx.lineTo(x, y)
       ctx.stroke()
-      redrawCanvas() // Add this to update the composite canvas immediately
     } else {
       // For shapes, we'll preview them on the main canvas during mouse move
       const mainCtx = canvasRef.current.getContext("2d")
@@ -477,15 +532,15 @@ export default function DrawingCanvas({
       save: saveAsImage,
     }
 
-    // @ts-expect-error
+    // @ts-ignore
     window.drawingApp = drawingApp
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
-      // @ts-expect-error
+      // @ts-ignore
       delete window.drawingApp
     }
-  }, [historyIndex, history, handleUndo, handleRedo, handleClearCanvas])
+  }, [historyIndex, history])
 
   return (
     <div
