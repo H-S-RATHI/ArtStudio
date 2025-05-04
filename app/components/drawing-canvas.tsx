@@ -4,12 +4,18 @@ import type React from "react"
 
 import { useRef, useEffect, useState } from "react"
 
+interface Layer {
+  id: string
+  canvas: HTMLCanvasElement | null
+  visible: boolean
+}
+
 interface DrawingCanvasProps {
   tool: string
   brushSize: number
   color: string
-  layers: any[]
-  setLayers: React.Dispatch<React.SetStateAction<any[]>>
+  layers: Layer[]
+  setLayers: React.Dispatch<React.SetStateAction<Layer[]>>
   activeLayerId: string
   onUndoStatusChange: (canUndo: boolean, canRedo: boolean) => void
 }
@@ -29,6 +35,24 @@ export default function DrawingCanvas({
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null)
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+
+  // Redraw the composite canvas from all visible layers
+  const redrawCanvas = () => {
+    if (!canvasRef.current) return
+
+    const ctx = canvasRef.current.getContext("2d")
+    if (!ctx) return
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+
+    // Draw each visible layer
+    layers.forEach((layer) => {
+      if (layer.visible && layer.canvas) {
+        ctx.drawImage(layer.canvas, 0, 0)
+      }
+    })
+  }
 
   // Initialize canvas and layers
   useEffect(() => {
@@ -80,7 +104,7 @@ export default function DrawingCanvas({
     return () => {
       window.removeEventListener("resize", resizeCanvas)
     }
-  }, [])
+  }, [setLayers])
 
   // Update undo/redo status
   useEffect(() => {
@@ -91,24 +115,6 @@ export default function DrawingCanvas({
   useEffect(() => {
     redrawCanvas()
   }, [layers])
-
-  // Redraw the composite canvas from all visible layers
-  const redrawCanvas = () => {
-    if (!canvasRef.current) return
-
-    const ctx = canvasRef.current.getContext("2d")
-    if (!ctx) return
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-
-    // Draw each visible layer
-    layers.forEach((layer) => {
-      if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
-      }
-    })
-  }
 
   // Get the active layer's canvas context
   const getActiveLayerContext = () => {
@@ -532,15 +538,15 @@ export default function DrawingCanvas({
       save: saveAsImage,
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     window.drawingApp = drawingApp
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
-      // @ts-ignore
+      // @ts-expect-error
       delete window.drawingApp
     }
-  }, [historyIndex, history])
+  }, [historyIndex, history, handleUndo, handleRedo, handleClearCanvas, saveAsImage])
 
   return (
     <div
