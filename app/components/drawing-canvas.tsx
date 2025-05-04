@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useRef, useEffect, useState, useCallback } from "react"
+import { useRef, useEffect, useState, useCallback, useMemo } from "react"
 
 interface Layer {
   id: string
@@ -36,8 +36,11 @@ export default function DrawingCanvas({
   const [history, setHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
 
+  // Memoize the layers array to prevent unnecessary re-renders
+  const memoizedLayers = useMemo(() => layers, [layers])
+
   // Redraw the composite canvas from all visible layers
-  const redrawCanvas = () => {
+  const redrawCanvas = useCallback(() => {
     if (!canvasRef.current) return
 
     const ctx = canvasRef.current.getContext("2d")
@@ -52,7 +55,7 @@ export default function DrawingCanvas({
         ctx.drawImage(layer.canvas, 0, 0)
       }
     })
-  }
+  }, [canvasRef, layers])
 
   // Initialize canvas and layers
   useEffect(() => {
@@ -67,29 +70,33 @@ export default function DrawingCanvas({
       canvas.height = container.clientHeight
 
       // Initialize all layer canvases with the same dimensions
-      setLayers((prevLayers) =>
-        prevLayers.map((layer) => {
-          if (!layer.canvas) {
-            const newCanvas = document.createElement("canvas")
-            newCanvas.width = canvas.width
-            newCanvas.height = canvas.height
-            return { ...layer, canvas: newCanvas }
-          }
+      const updatedLayers = memoizedLayers.map((layer) => {
+        if (!layer.canvas) {
+          const newCanvas = document.createElement("canvas")
+          newCanvas.width = canvas.width
+          newCanvas.height = canvas.height
+          return { ...layer, canvas: newCanvas }
+        }
 
-          if (layer.canvas.width !== canvas.width || layer.canvas.height !== canvas.height) {
-            const newCanvas = document.createElement("canvas")
-            newCanvas.width = canvas.width
-            newCanvas.height = canvas.height
-            const ctx = newCanvas.getContext("2d")
-            if (ctx) {
-              ctx.drawImage(layer.canvas, 0, 0)
-            }
-            return { ...layer, canvas: newCanvas }
+        if (layer.canvas.width !== canvas.width || layer.canvas.height !== canvas.height) {
+          const newCanvas = document.createElement("canvas")
+          newCanvas.width = canvas.width
+          newCanvas.height = canvas.height
+          const ctx = newCanvas.getContext("2d")
+          if (ctx) {
+            ctx.drawImage(layer.canvas, 0, 0)
           }
+          return { ...layer, canvas: newCanvas }
+        }
 
-          return layer
-        }),
-      )
+        return layer
+      })
+
+      // Only update state if layers actually changed
+      const layersChanged = JSON.stringify(updatedLayers) !== JSON.stringify(memoizedLayers)
+      if (layersChanged) {
+        setLayers(updatedLayers)
+      }
 
       // Redraw the composite canvas
       redrawCanvas()
@@ -104,17 +111,17 @@ export default function DrawingCanvas({
     return () => {
       window.removeEventListener("resize", resizeCanvas)
     }
-  }, [setLayers, redrawCanvas])
+  }, [setLayers, canvasRef, layers])
 
   // Update undo/redo status
   useEffect(() => {
     onUndoStatusChange(historyIndex > 0, historyIndex < history.length - 1)
-  }, [historyIndex, history, onUndoStatusChange, redrawCanvas])
+  }, [historyIndex, history, onUndoStatusChange])
 
   // Redraw the main canvas whenever layers change
   useEffect(() => {
     redrawCanvas()
-  }, [layers, redrawCanvas])
+  }, [layers])
 
   // Get the active layer's canvas context
   const getActiveLayerContext = () => {
