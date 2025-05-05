@@ -14,8 +14,8 @@ export default function DrawingApp() {
   const [currentColor, setCurrentColor] = useState<string>("#000000")
   const [layers, setLayers] = useState<Layer[]>([{ id: "1", name: "Layer 1", visible: true, canvas: null }])
   const [activeLayerId, setActiveLayerId] = useState<string>("1")
-  const [canUndo, setCanUndo] = useState<boolean>(false)
-  const [canRedo, setCanRedo] = useState<boolean>(false)
+  const [canUndo, setCanUndo] = useState(false)
+  const [canRedo, setCanRedo] = useState(false)
 
   const handleToolChange = (tool: string) => {
     setCurrentTool(tool)
@@ -57,6 +57,7 @@ export default function DrawingApp() {
     setCanUndo(canUndo)
     setCanRedo(canRedo)
   }
+
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">

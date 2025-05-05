@@ -1,8 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-
 interface ColorPaletteProps {
   currentColor: string
   onColorChange: (color: string) => void

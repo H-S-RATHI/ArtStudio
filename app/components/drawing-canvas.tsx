@@ -27,7 +27,6 @@ export default function DrawingCanvas({
   tool,
   brushSize,
   color,
-  setBrushSize,
   setColor,
   layers,
   setLayers,
