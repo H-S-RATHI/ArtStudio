@@ -113,7 +113,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   ]
 
   return (
-    <div className="p-4">
+    <div className="p-4 py-1">
       <h2 className="font-medium text-gray-700 mb-3">Tools</h2>
       <div className="grid grid-cols-2 gap-2">
         {tools.map((tool) => (
@@ -149,7 +149,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
             onChange={(e) => onBrushSizeChange(Number.parseInt(e.target.value))}
             className="w-full"
           />
-          <div className="text-center text-xs text-gray-500">{brushSize}px</div>
+          <div className="text-center text-xs text-gray-500 px-6">{brushSize}px</div>
         </div>
       </div>
     </div>

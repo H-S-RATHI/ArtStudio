@@ -50,13 +50,20 @@ export default function DrawingCanvas({
     const ctx = canvasRef.current.getContext("2d")
     if (!ctx) return
 
+    console.log('Redrawing canvas with layers:', layers.map(l => ({ id: l.id, visible: l.visible })))
+
     // Clear the canvas
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
     // Draw each visible layer
     layers.forEach((layer) => {
       if (layer.visible && layer.canvas) {
-        ctx.drawImage(layer.canvas, 0, 0)
+        console.log('Drawing layer:', layer.id)
+        try {
+          ctx.drawImage(layer.canvas, 0, 0)
+        } catch (error) {
+          console.error('Error drawing layer:', layer.id, error)
+        }
       }
     })
   }, [canvasRef, layers])
