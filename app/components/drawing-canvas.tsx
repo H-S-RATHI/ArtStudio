@@ -15,6 +15,8 @@ interface DrawingCanvasProps {
   tool: string
   brushSize: number
   color: string
+  setBrushSize: (size: number) => void
+  setColor: (color: string) => void
   layers: Layer[]
   setLayers: React.Dispatch<React.SetStateAction<Layer[]>>
   activeLayerId: string
@@ -25,6 +27,8 @@ export default function DrawingCanvas({
   tool,
   brushSize,
   color,
+  setBrushSize,
+  setColor,
   layers,
   setLayers,
   activeLayerId,
@@ -555,21 +559,81 @@ export default function DrawingCanvas({
   }, [historyIndex, history, handleUndo, handleRedo, handleClearCanvas, saveAsImage])
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full max-w-5xl max-h-[80vh] bg-white rounded-lg shadow-lg overflow-hidden"
-    >
-      <canvas
-        ref={canvasRef}
+    <div  ref={containerRef} className="w-full h-full max-w-5xl max-h-[80vh] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="flex justify-between items-center p-4 border-b">
+        
+
+        <div className="flex items-center space-x-4">
+          
+
+          <div className="flex items-center space-x-2">
+            <label htmlFor="color-picker" className="text-sm text-gray-600">
+              Color:
+            </label>
+            <input
+              id="color-picker"
+              type="color"
+              value={color}
+              onChange={(e) => {
+                setColor(e.target.value)
+                window.drawingApp?.undo()
+                window.drawingApp?.redo()
+                window.drawingApp?.clear()
+              }}
+              className="w-8 h-8 p-0 border-0"
+            />
+          </div>
+        </div>
+
+        <div className="flex space-x-2">
+          <button
+            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={() => window.drawingApp?.undo()}
+            disabled={historyIndex <= 0}
+            title="Undo"
+          >
+            ↩️
+          </button>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={() => window.drawingApp?.redo()}
+            disabled={historyIndex >= history.length - 1}
+            title="Redo"
+          >
+            ↪️
+          </button>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={() => window.drawingApp?.clear()}
+            title="Clear Canvas"
+          >
+            🗑️
+          </button>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={saveAsImage}
+            title="Save as Image"
+          >
+            💾
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-1">
+        <div className="flex-1 relative" ref={containerRef}>
+          <canvas
+            ref={canvasRef}
         className="w-full h-full cursor-crosshair touch-none"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      />
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          />
+        </div>
+      </div>
     </div>
   )
 }

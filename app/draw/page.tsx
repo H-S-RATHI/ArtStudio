@@ -3,7 +3,6 @@
 import { useState } from "react"
 import DrawingCanvas from "@/app/components/drawing-canvas"
 import Toolbar from "@/app/components/toolbar"
-import ColorPalette from "@/app/components/color-palette"
 import LayersPanel from "@/app/components/layers-panel"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -82,7 +81,8 @@ export default function DrawingApp() {
             <h1 className="text-xl font-bold text-gray-800">ArtStudio Pro</h1>
           </Link>
         </div>
-        <div>
+        <div className="flex items-center space-x-4">
+
           <button
             className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
             onClick={() => document.getElementById("canvas-download")?.click()}
@@ -97,21 +97,16 @@ export default function DrawingApp() {
           initial={{ width: 0, opacity: 0 }}
           animate={{ width: "auto", opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-16 md:w-64 border-r border-gray-200 bg-white flex flex-col"
+          className="w-16 md:w-64 border-r border-gray-200 bg-white flex flex-col overflow-y-auto"
         >
           <Toolbar
             currentTool={currentTool}
             onToolChange={handleToolChange}
             brushSize={brushSize}
             onBrushSizeChange={handleBrushSizeChange}
-            canUndo={canUndo}
-            canRedo={canRedo}
+            currentColor={currentColor}
+            onColorChange={handleColorChange}
           />
-
-          <div className="border-t border-gray-200 p-4">
-            <h2 className="font-medium text-gray-700 mb-3">Color</h2>
-            <ColorPalette currentColor={currentColor} onColorChange={handleColorChange} />
-          </div>
 
           <div className="border-t border-gray-200 p-4 flex-1 overflow-y-auto">
             <h2 className="font-medium text-gray-700 mb-3">Layers</h2>
@@ -136,6 +131,8 @@ export default function DrawingApp() {
             tool={currentTool}
             brushSize={brushSize}
             color={currentColor}
+            setBrushSize={setBrushSize}
+            setColor={handleColorChange}
             layers={layers}
             setLayers={setLayers}
             activeLayerId={activeLayerId}
