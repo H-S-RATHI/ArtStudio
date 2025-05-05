@@ -88,6 +88,39 @@ export default function DrawingApp() {
     // No-op since we're not using undo/redo status in the UI for now
   }
 
+  const handleSaveImage = () => {
+    const canvas = document.querySelector('canvas')
+    if (!canvas) return
+
+    // Create a temporary canvas to combine all visible layers
+    const tempCanvas = document.createElement('canvas')
+    const tempCtx = tempCanvas.getContext('2d')
+    if (!tempCtx) return
+
+    // Set the temporary canvas size to match the main canvas
+    tempCanvas.width = canvas.width
+    tempCanvas.height = canvas.height
+
+    // Clear the temporary canvas
+    tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height)
+
+
+    // Draw all visible layers onto the temporary canvas
+    layers.forEach(layer => {
+      if (layer.visible && layer.canvas) {
+        tempCtx.drawImage(layer.canvas, 0, 0)
+      }
+    })
+
+    // Create a download link
+    const link = document.createElement('a')
+    link.download = `drawing-${new Date().toISOString().slice(0, 10)}.png`
+    link.href = tempCanvas.toDataURL('image/png')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -116,7 +149,7 @@ export default function DrawingApp() {
 
           <button
             className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-            onClick={() => document.getElementById("canvas-download")?.click()}
+            onClick={handleSaveImage}
           >
             Save as Image
           </button>
