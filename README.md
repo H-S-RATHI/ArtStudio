@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ArtStudio Pro
 
-## Getting Started
+A modern, feature-rich drawing application built with Next.js, React, and TypeScript. ArtStudio Pro provides a powerful yet intuitive interface for digital artists and designers to create beautiful artwork with multiple layers and various drawing tools.
 
-First, run the development server:
+![ArtStudio Pro Logo](public/next.svg)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🌟 Features
+
+- 🎨 Multiple drawing tools (Brush, Eraser, Shapes, Text)
+- 🖌️ Adjustable brush size and color
+- 🏗️ Layer-based drawing system
+- 👁️ Toggle layer visibility
+- 🔄 Undo/Redo functionality
+- 🎨 Color palette with custom color picker
+- 📱 Responsive design that works on all devices
+- ⚡ Built with Next.js for optimal performance
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/artstudio-pro.git
+   cd artstudio-pro
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🛠️ Tech Stack
+
+- **Frontend Framework**: Next.js 13+
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Animation**: Framer Motion
+- **State Management**: React Hooks
+- **Bundler**: Webpack (via Next.js)
+
+## 📁 Project Structure
+
+```
+artstudio-pro/
+├── app/                    # Next.js 13+ app directory
+│   ├── components/         # Reusable components
+│   │   ├── color-palette.tsx
+│   │   ├── drawing-canvas.tsx
+│   │   ├── layers-panel.tsx
+│   │   └── toolbar.tsx
+│   ├── draw/               # Drawing application page
+│   │   └── page.tsx
+│   ├── types/              # TypeScript type definitions
+│   │   └── window.d.ts
+│   ├── globals.css         # Global styles
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Landing page
+├── public/                 # Static assets
+└── package.json            # Project dependencies and scripts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎨 Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Start Drawing**: Click on the "Start Drawing" button to open the drawing canvas.
+2. **Select Tools**: Use the toolbar on the left to select different drawing tools.
+3. **Adjust Settings**: Modify brush size and color using the controls at the top.
+4. **Manage Layers**: Add, remove, or toggle visibility of layers from the right panel.
+5. **Save Your Work**: Use the save button to download your artwork.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contributing
 
-## Learn More
+Contributions are welcome! Please follow these steps:
 
-To learn more about Next.js, take a look at the following resources:
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Deploy on Vercel
+## 🙏 Acknowledgments
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js team for the amazing framework
+- React community for the component-based architecture
+- All contributors who helped in any way
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Made with ❤️ by [Your Name]
