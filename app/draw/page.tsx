@@ -8,6 +8,17 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import type { Layer } from "@/app/components/drawing-canvas"
 
+interface ToolbarProps {
+  currentTool: string
+  onToolChange: (tool: string) => void
+  brushSize: number
+  onBrushSizeChange: (size: number) => void
+  canUndo: boolean
+  canRedo: boolean
+  onUndo: () => void
+  onRedo: () => void
+}
+
 export default function DrawingApp() {
   const [currentTool, setCurrentTool] = useState<string>("brush")
   const [brushSize, setBrushSize] = useState<number>(5)
@@ -105,10 +116,6 @@ export default function DrawingApp() {
             onToolChange={handleToolChange}
             brushSize={brushSize}
             onBrushSizeChange={handleBrushSizeChange}
-            canUndo={canUndo}
-            canRedo={canRedo}
-            onUndo={() => {}}
-            onRedo={() => {}}
           />
 
           <div className="border-t border-gray-200 p-4 flex-1 overflow-y-auto">
