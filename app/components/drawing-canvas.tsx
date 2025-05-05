@@ -122,10 +122,17 @@ export default function DrawingCanvas({
     onUndoStatusChange(historyIndex > 0, historyIndex < history.length - 1)
   }, [historyIndex, history, onUndoStatusChange])
 
-  // Redraw the main canvas whenever layers change
+  // Redraw the main canvas whenever layers change or active layer changes
   useEffect(() => {
+    console.log('Active layer changed to:', activeLayerId)
+    
+    // Force a re-render of the canvas when the active layer changes
+    const activeLayer = layers.find(layer => layer.id === activeLayerId)
+    console.log('Active layer details:', activeLayer)
+    
+    // Redraw the canvas with the current layers
     redrawCanvas()
-  }, [layers])
+  }, [layers, activeLayerId])
 
   // Get the active layer's canvas context
   const getActiveLayerContext = () => {

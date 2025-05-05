@@ -38,9 +38,15 @@ export default function LayersPanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className={`p-2 rounded-md flex items-center justify-between ${
-              activeLayerId === layer.id ? "bg-purple-100" : "bg-white border border-gray-200"
+            className={`p-2 rounded-md flex items-center justify-between cursor-pointer ${
+              activeLayerId === layer.id 
+                ? "bg-purple-100 border border-purple-300" 
+                : "bg-white border border-gray-200 hover:bg-gray-50"
             }`}
+            onClick={() => {
+              console.log('Layer clicked:', layer.id)
+              onSelectLayer(layer.id)
+            }}
           >
             <div className="flex items-center">
               <button

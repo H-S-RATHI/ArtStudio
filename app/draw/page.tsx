@@ -31,7 +31,31 @@ export default function DrawingApp() {
   const handleAddLayer = () => {
     const newLayerId = `layer-${Date.now()}`
     const newLayerName = `Layer ${layers.length + 1}`
-    setLayers([...layers, { id: newLayerId, name: newLayerName, visible: true, canvas: null }])
+    
+    // Create a new canvas for the new layer
+    const newCanvas = document.createElement('canvas')
+    newCanvas.width = 800 // Set appropriate width
+    newCanvas.height = 600 // Set appropriate height
+    
+    // Add the new layer at the top of the stack
+    setLayers(prevLayers => [
+      ...prevLayers.map(layer => ({
+        ...layer,
+        // Create a copy of the canvas for each existing layer to prevent reference issues
+        canvas: layer.canvas ? (() => {
+          const copy = document.createElement('canvas')
+          copy.width = layer.canvas?.width || 800
+          copy.height = layer.canvas?.height || 600
+          const ctx = copy.getContext('2d')
+          if (ctx && layer.canvas) {
+            ctx.drawImage(layer.canvas, 0, 0)
+          }
+          return copy
+        })() : null
+      })),
+      { id: newLayerId, name: newLayerName, visible: true, canvas: newCanvas }
+    ])
+    
     setActiveLayerId(newLayerId)
   }
 
@@ -49,7 +73,15 @@ export default function DrawingApp() {
   }
 
   const handleLayerSelect = (layerId: string) => {
+    console.log('Selecting layer:', layerId)
     setActiveLayerId(layerId)
+    
+    // Force a re-render of the layers to ensure the active state updates
+    setLayers(prevLayers => {
+      const newLayers = [...prevLayers]
+      console.log('Updated active layer ID to:', layerId)
+      return newLayers
+    })
   }
 
   const handleUndoStatusChange = () => {
