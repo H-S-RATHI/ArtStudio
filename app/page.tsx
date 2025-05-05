@@ -86,7 +86,7 @@ export default function LandingPage() {
             className="rounded-xl overflow-hidden shadow-2xl"
           >
             <Image
-              src="/placeholder.svg?height=600&width=800"
+              src="/globe.svg?height=600&width=800"
               alt="Digital Art Example"
               width={800}
               height={600}
