@@ -8,16 +8,6 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import type { Layer } from "@/app/components/drawing-canvas"
 
-interface ToolbarProps {
-  currentTool: string
-  onToolChange: (tool: string) => void
-  brushSize: number
-  onBrushSizeChange: (size: number) => void
-  canUndo: boolean
-  canRedo: boolean
-  onUndo: () => void
-  onRedo: () => void
-}
 
 export default function DrawingApp() {
   const [currentTool, setCurrentTool] = useState<string>("brush")
@@ -25,8 +15,6 @@ export default function DrawingApp() {
   const [currentColor, setCurrentColor] = useState<string>("#000000")
   const [layers, setLayers] = useState<Layer[]>([{ id: "1", name: "Layer 1", visible: true, canvas: null }])
   const [activeLayerId, setActiveLayerId] = useState<string>("1")
-  const [canUndo, setCanUndo] = useState(false)
-  const [canRedo, setCanRedo] = useState(false)
 
   const handleToolChange = (tool: string) => {
     setCurrentTool(tool)
@@ -64,9 +52,8 @@ export default function DrawingApp() {
     setActiveLayerId(layerId)
   }
 
-  const handleUndoStatusChange = (canUndo: boolean, canRedo: boolean) => {
-    setCanUndo(canUndo)
-    setCanRedo(canRedo)
+  const handleUndoStatusChange = () => {
+    // No-op since we're not using undo/redo status in the UI for now
   }
 
 

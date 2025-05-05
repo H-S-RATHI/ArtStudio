@@ -575,9 +575,6 @@ export default function DrawingCanvas({
               value={color}
               onChange={(e) => {
                 setColor(e.target.value)
-                window.drawingApp?.undo()
-                window.drawingApp?.redo()
-                window.drawingApp?.clear()
               }}
               className="w-8 h-8 p-0 border-0"
             />
