@@ -7,6 +7,10 @@ interface ToolbarProps {
   onToolChange: (tool: string) => void
   brushSize: number
   onBrushSizeChange: (size: number) => void
+  canUndo?: boolean
+  canRedo?: boolean
+  onUndo?: () => void
+  onRedo?: () => void
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -14,6 +18,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onToolChange,
   brushSize,
   onBrushSizeChange,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
 }) => {
   const tools = [
     {
