@@ -7,8 +7,6 @@ interface ToolbarProps {
   onToolChange: (tool: string) => void
   brushSize: number
   onBrushSizeChange: (size: number) => void
-  currentColor: string
-  onColorChange: (color: string) => void
   canUndo: boolean
   canRedo: boolean
   onUndo: () => void
@@ -20,8 +18,6 @@ export default function Toolbar({
   onToolChange,
   brushSize,
   onBrushSizeChange,
-  currentColor,
-  onColorChange,
   canUndo,
   canRedo,
   onUndo,

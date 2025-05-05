@@ -105,8 +105,6 @@ export default function DrawingApp() {
             onToolChange={handleToolChange}
             brushSize={brushSize}
             onBrushSizeChange={handleBrushSizeChange}
-            currentColor={currentColor}
-            onColorChange={handleColorChange}
             canUndo={canUndo}
             canRedo={canRedo}
             onUndo={() => {}}
