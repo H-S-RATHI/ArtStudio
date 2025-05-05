@@ -106,7 +106,6 @@ export default function DrawingApp() {
           />
 
           <div className="border-t border-gray-200 p-4 flex-1 overflow-y-auto">
-            <h2 className="font-medium text-gray-700 mb-3">Layers</h2>
             <LayersPanel
               layers={layers}
               activeLayerId={activeLayerId}

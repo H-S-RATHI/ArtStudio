@@ -140,7 +140,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="mt-4">
 
         <h2 className="font-medium text-gray-700 mb-2 text-sm">Brush Size</h2>
-        <div className="flex flex-col space-y-4 p-4">
+        <div className="flex space-y-4 p-4">
           <input
             type="range"
             min="1"
