@@ -9,6 +9,10 @@ interface ToolbarProps {
   onBrushSizeChange: (size: number) => void
   currentColor: string
   onColorChange: (color: string) => void
+  canUndo: boolean
+  canRedo: boolean
+  onUndo: () => void
+  onRedo: () => void
 }
 
 export default function Toolbar({
@@ -18,6 +22,10 @@ export default function Toolbar({
   onBrushSizeChange,
   currentColor,
   onColorChange,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
 }: ToolbarProps) {
   const tools = [
     {
@@ -142,7 +150,29 @@ export default function Toolbar({
       <div className="mt-4">
 
         <h2 className="font-medium text-gray-700 mb-2 text-sm">Brush Size</h2>
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-4 p-4">
+          <div className="flex space-x-2">
+            <button
+              onClick={onUndo}
+              disabled={!canUndo}
+              className={`p-2 rounded ${canUndo ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+              title="Undo (Ctrl+Z)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <button
+              onClick={onRedo}
+              disabled={!canRedo}
+              className={`p-2 rounded ${canRedo ? 'text-gray-700 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+              title="Redo (Ctrl+Shift+Z)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
           <input
             type="range"
             min="1"

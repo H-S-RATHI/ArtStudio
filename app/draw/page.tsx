@@ -107,6 +107,10 @@ export default function DrawingApp() {
             onBrushSizeChange={handleBrushSizeChange}
             currentColor={currentColor}
             onColorChange={handleColorChange}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={() => {}}
+            onRedo={() => {}}
           />
 
           <div className="border-t border-gray-200 p-4 flex-1 overflow-y-auto">
